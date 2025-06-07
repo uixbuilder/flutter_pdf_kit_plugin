@@ -11,7 +11,18 @@ class MethodChannelFlutterPdfKitPlugin extends FlutterPdfKitPluginPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version = await methodChannel.invokeMethod<String>(
+      'getPlatformVersion',
+    );
     return version;
+  }
+
+  @override
+  Future<List<String>?> extractHighlightedText(String pdfPath) async {
+    final highlights = await methodChannel.invokeMethod<List<dynamic>>(
+      'extractHighlightedText',
+      <String, dynamic>{'filePath': pdfPath},
+    );
+    return highlights?.cast<String>();
   }
 }

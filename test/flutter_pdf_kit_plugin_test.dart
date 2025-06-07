@@ -7,13 +7,22 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockFlutterPdfKitPluginPlatform
     with MockPlatformInterfaceMixin
     implements FlutterPdfKitPluginPlatform {
-
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
+
+  @override
+  Future<List<String>?> extractHighlightedText(String pdfPath) {
+    throw UnimplementedError(
+      'extractHighlightedText() has not been implemented.',
+    );
+  }
 }
 
 void main() {
-  final FlutterPdfKitPluginPlatform initialPlatform = FlutterPdfKitPluginPlatform.instance;
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  final FlutterPdfKitPluginPlatform initialPlatform =
+      FlutterPdfKitPluginPlatform.instance;
 
   test('$MethodChannelFlutterPdfKitPlugin is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelFlutterPdfKitPlugin>());
@@ -21,7 +30,8 @@ void main() {
 
   test('getPlatformVersion', () async {
     FlutterPdfKitPlugin flutterPdfKitPlugin = FlutterPdfKitPlugin();
-    MockFlutterPdfKitPluginPlatform fakePlatform = MockFlutterPdfKitPluginPlatform();
+    MockFlutterPdfKitPluginPlatform fakePlatform =
+        MockFlutterPdfKitPluginPlatform();
     FlutterPdfKitPluginPlatform.instance = fakePlatform;
 
     expect(await flutterPdfKitPlugin.getPlatformVersion(), '42');

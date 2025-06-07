@@ -11,4 +11,8 @@ class FlutterPdfKitPlugin {
   Future<String?> getPlatformVersion() {
     return FlutterPdfKitPluginPlatform.instance.getPlatformVersion();
   }
+
+  Future<List<String>?> extractHighlightedText(String pdfPath) {
+    return FlutterPdfKitPluginPlatform.instance.extractHighlightedText(pdfPath);
+  }
 }

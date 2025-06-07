@@ -8,7 +8,8 @@ abstract class FlutterPdfKitPluginPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static FlutterPdfKitPluginPlatform _instance = MethodChannelFlutterPdfKitPlugin();
+  static FlutterPdfKitPluginPlatform _instance =
+      MethodChannelFlutterPdfKitPlugin();
 
   /// The default instance of [FlutterPdfKitPluginPlatform] to use.
   ///
@@ -25,5 +26,11 @@ abstract class FlutterPdfKitPluginPlatform extends PlatformInterface {
 
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
+  Future<List<String>?> extractHighlightedText(String pdfPath) {
+    throw UnimplementedError(
+      'extractHighlightedText() has not been implemented.',
+    );
   }
 }

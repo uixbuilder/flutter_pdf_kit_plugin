@@ -5,20 +5,20 @@ import 'package:flutter_pdf_kit_plugin/flutter_pdf_kit_plugin_method_channel.dar
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  MethodChannelFlutterPdfKitPlugin platform = MethodChannelFlutterPdfKitPlugin();
+  MethodChannelFlutterPdfKitPlugin platform =
+      MethodChannelFlutterPdfKitPlugin();
   const MethodChannel channel = MethodChannel('flutter_pdf_kit_plugin');
 
   setUp(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      channel,
-      (MethodCall methodCall) async {
-        return '42';
-      },
-    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+          return '42';
+        });
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(channel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
   });
 
   test('getPlatformVersion', () async {
