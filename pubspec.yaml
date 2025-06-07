@@ -1,11 +1,11 @@
 name: flutter_pdf_kit_plugin
-description: A new Flutter plugin project.
+description: "A new Flutter plugin project."
 version: 0.0.1
 homepage:
 
 environment:
-  sdk: '>=3.0.0-257.0.dev <4.0.0'
-  flutter: ">=2.5.0"
+  sdk: ^3.9.0-196.0.dev
+  flutter: '>=3.3.0'
 
 dependencies:
   flutter:
@@ -15,7 +15,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -32,9 +32,9 @@ flutter:
   # This is required for using `dart:ffi`.
   # All these are used by the tooling to maintain consistency when
   # adding or updating assets for this project.
-  # the instruction here:
-  # https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms
   plugin:
+    # The instruction here:
+    # https://flutter.dev/to/pubspec-plugin-platforms
     platforms:
       android:
         package: com.example.flutter_pdf_kit_plugin
@@ -46,10 +46,10 @@ flutter:
   #   - images/a_dot_ham.jpeg
   #
   # For details regarding assets in packages, see
-  # https://flutter.dev/assets-and-images/#from-packages
+  # https://flutter.dev/to/asset-from-package
   #
   # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/assets-and-images/#resolution-aware
+  # https://flutter.dev/to/resolution-aware-images
 
   # To add custom fonts to your plugin package, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
@@ -69,4 +69,4 @@ flutter:
   #         weight: 700
   #
   # For details regarding fonts in packages, see
-  # https://flutter.dev/custom-fonts/#from-packages
+  # https://flutter.dev/to/font-from-package

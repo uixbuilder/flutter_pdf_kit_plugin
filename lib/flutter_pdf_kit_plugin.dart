@@ -3,7 +3,7 @@
 // platform, run `flutter create -t plugin --platforms <platforms> .` under the
 // same directory. You can also find a detailed instruction on how to add
 // platforms in the `pubspec.yaml` at
-// https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
+// https://flutter.dev/to/pubspec-plugin-platforms.
 
 import 'flutter_pdf_kit_plugin_platform_interface.dart';
 
