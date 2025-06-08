@@ -6,11 +6,14 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.pdmodel.interactive.annotation.PDAnnotationTextMarkup
-import com.tom_roush.pdfbox.text.PDFTextStripperByArea
-import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import com.tom_roush.pdfbox.pdmodel.PDPage
+import com.tom_roush.pdfbox.text.PDFTextStripper
+import com.tom_roush.pdfbox.text.TextPosition
 import java.io.File
+
 
 /** FlutterPdfKitPlugin */
 class FlutterPdfKitPlugin :
@@ -57,48 +60,63 @@ class FlutterPdfKitPlugin :
      * Extracts highlighted text from a PDF file.
      * Returns a list of highlighted strings.
      */
+
     fun extractHighlightedText(pdfPath: String): List<String> {
-        val highlights = mutableListOf<String>()
         val pdfFile = File(pdfPath)
         val document = PDDocument.load(pdfFile)
-        // highlights.add("loaded pages: ${document.numberOfPages}")
+        val highlightedTexts = mutableListOf<String>()
+
         for (pageIndex in 0 until document.numberOfPages) {
             val page = document.getPage(pageIndex)
             val annotations = page.annotations
-            // highlights.add("page $pageIndex has ${annotations.size} annotations")
+            val pageHeight = page.mediaBox.height
+
+            // 1. Collect all TextPosition objects from this page
+            val textPositions = mutableListOf<TextPosition>()
+            val stripper = object : PDFTextStripper() {
+                override fun processTextPosition(text: TextPosition) {
+                    textPositions.add(text)
+                }
+            }
+            stripper.startPage = pageIndex + 1
+            stripper.endPage = pageIndex + 1
+            stripper.getText(document)
+
+            // 2. For each highlight annotation, check which TextPositions are inside each quad
             for (annotation in annotations) {
                 if (annotation is PDAnnotationTextMarkup && annotation.subtype == PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT) {
-                    // highlights.add("Found highlight annotation on page $pageIndex")
-                    val quads = annotation.quadPoints
-                    if (quads != null) {
-                        // highlights.add("Quad points: ${quads.joinToString(", ")}")
-                        var i = 0
-                        while (i + 7 < quads.size) {
-                            val xs = listOf(quads[i], quads[i+2], quads[i+4], quads[i+6])
-                            val ys = listOf(quads[i+1], quads[i+3], quads[i+5], quads[i+7])
+                    val quads = annotation.quadPoints ?: continue
+                    var i = 0
+                    while (i + 7 < quads.size) {
+                        // Get quad rectangle in PDF coordinates
+                        val xs = listOf(quads[i], quads[i+2], quads[i+4], quads[i+6])
+                        val ys = listOf(quads[i+1], quads[i+3], quads[i+5], quads[i+7])
+                        val left = xs.minOrNull() ?: continue
+                        val right = xs.maxOrNull() ?: continue
+                        var top = ys.maxOrNull() ?: continue
+                        var bottom = ys.minOrNull() ?: continue
+                        // Convert PDF coordinates (origin bottom) to Java/Android (origin top)
+                        top = pageHeight - top
+                        bottom = pageHeight - bottom
 
-                            val left = xs.minOrNull() ?: 0f
-                            val right = xs.maxOrNull() ?: 0f
-                            val top = ys.minOrNull() ?: 0f
-                            val bottom = ys.maxOrNull() ?: 0f
-
-                            val rect = android.graphics.RectF(left, top, right, bottom)
-                            val stripper = PDFTextStripperByArea()
-                            stripper.addRegion("highlight", rect)
-                            stripper.extractRegions(page)
-                            val text = stripper.getTextForRegion("highlight").trim()
-                            if (text.isNotEmpty()) {
-                                highlights.add(text)
-                            }
-
-                            i += 8
+                        // In PDFBox, y=0 is bottom; so characterCenterY = tp.y - tp.height / 2f is already Java coordinates
+                        val highlightedChars = textPositions.filter { tp ->
+                            val centerX = tp.x + tp.width / 2f
+                            val centerY = tp.y - tp.height / 2f // May need to verify this if highlight is a bit off
+                            centerX in left..right && centerY in top..bottom
                         }
+                        val highlightedText = highlightedChars.joinToString(separator = "") { it.unicode }
+                            .trim()
+                        if (highlightedText.isNotEmpty()) {
+                            highlightedTexts.add(highlightedText)
+                        }
+                        i += 8
                     }
                 }
             }
         }
-
+        
         document.close()
-        return highlights
+        return highlightedTexts
     }
 }
