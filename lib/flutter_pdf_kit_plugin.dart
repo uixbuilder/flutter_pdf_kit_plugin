@@ -15,4 +15,9 @@ class FlutterPdfKitPlugin {
   Future<List<String>?> extractHighlightedText(String pdfPath) {
     return FlutterPdfKitPluginPlatform.instance.extractHighlightedText(pdfPath);
   }
+
+  Future<bool> highlightTextInPdf(String pdfPath, String textToHighlight) {
+    return FlutterPdfKitPluginPlatform.instance
+        .highlightTextInPdf(pdfPath, textToHighlight);
+  }
 }

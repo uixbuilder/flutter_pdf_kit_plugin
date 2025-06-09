@@ -33,4 +33,10 @@ abstract class FlutterPdfKitPluginPlatform extends PlatformInterface {
       'extractHighlightedText() has not been implemented.',
     );
   }
+
+  Future<bool> highlightTextInPdf(String pdfPath, String textToHighlight) {
+    throw UnimplementedError(
+      'highlightTextInPdf() has not been implemented.',
+    );
+  }
 }

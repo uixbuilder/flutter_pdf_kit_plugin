@@ -25,4 +25,17 @@ class MethodChannelFlutterPdfKitPlugin extends FlutterPdfKitPluginPlatform {
     );
     return highlights?.cast<String>();
   }
+
+  @override
+  Future<bool> highlightTextInPdf(
+      String pdfPath, String textToHighlight) async {
+    final result = await methodChannel.invokeMethod<bool>(
+      'highlightTextInPdf',
+      <String, dynamic>{
+        'filePath': pdfPath,
+        'textToHighlight': textToHighlight,
+      },
+    );
+    return result ?? false;
+  }
 }
