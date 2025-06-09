@@ -31,3 +31,5 @@ build/
 
 # FVM Version Cache
 .fvm/
+example/.flutter-plugins
+example/pubspec.lock
