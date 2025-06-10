@@ -76,6 +76,10 @@ void main() {
     // 5. Extract highlighted texts and verify the content matches.
     final highlights = await plugin.extractHighlightedText(pdfFile.path);
 
+    // Clean up the temporary file
+    await pdfFile.delete();
+    await tempDir.delete();
+
     expect(highlights, isNotNull,
         reason: 'Extracted highlights should not be null');
     expect(highlights!.length, 1,
@@ -85,9 +89,5 @@ void main() {
       textToHighlight,
       reason: 'The highlighted text should exactly match the expected phrase',
     );
-
-    // Optional: clean up
-    await pdfFile.delete();
-    await tempDir.delete();
   });
 }
