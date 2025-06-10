@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import PDFKit
 
 public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -12,8 +13,29 @@ public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
     switch call.method {
     case "getPlatformVersion":
       result("iOS " + UIDevice.current.systemVersion)
+      case "extractHighlightedText":
+      guard let args = call.arguments as? [String: Any],
+            let pdfPath = args["filePath"] as? String else {
+        result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments provided", details: nil))
+        return
+      }
+
+      var highlightedTexts = extractHighlightedTextFromPdf(pdfPath: pdfPath)
+      result(highlightedTexts)
     default:
       result(FlutterMethodNotImplemented)
     }
+  }
+
+  private func extractHighlightedTextFromPdf(pdfPath: String) -> [String] {
+    PDFTextExtractor().extractHighlightedText(from: URL(fileURLWithPath: pdfPath))
+  }
+
+  private func highlightTextInPdf(pdfPath: String, textToHighlight: String) -> Bool {
+    // This function should implement the logic to highlight text in the PDF.
+    // The implementation is not provided here, but it would typically involve using PDFKit
+    // to modify the PDF and add highlight annotations.
+    assertionFailure("highlightTextInPdf is not implemented yet.")
+    return false
   }
 }

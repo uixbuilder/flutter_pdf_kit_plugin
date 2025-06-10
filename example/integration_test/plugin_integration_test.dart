@@ -31,12 +31,21 @@ void main() {
     final byteData = await rootBundle.load(
       'integration_test/assets/test_highlighted.pdf',
     );
+
+    // Write PDF data to a temporary file so the plugin can work with a file path.
     final tempDir = await Directory.systemTemp.createTemp();
     final pdfFile = File('${tempDir.path}/test_highlighted.pdf');
     await pdfFile.writeAsBytes(byteData.buffer.asUint8List());
 
+    // Create an instance of the plugin to call the method.
     final FlutterPdfKitPlugin plugin = FlutterPdfKitPlugin();
     final highlights = await plugin.extractHighlightedText(pdfFile.path);
+
+    // Clean up the temporary file
+    await pdfFile.delete();
+    await tempDir.delete();
+
+    // Verify that the highlights were extracted correctly.
     expect(highlights, isNotNull);
     expect(highlights!.length, 1);
     expect(highlights[0], 'reasons: for fresh air');
