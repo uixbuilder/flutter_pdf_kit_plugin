@@ -4,7 +4,20 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
+        {
+            "name": "iOS",
+            "cwd": "example",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "A85349E7-5BF1-4E0A-ABA0-F8D689957B60"
+        },
+        {
+            "name": "Android",
+            "cwd": "example",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "emulator-5554"
+        },
         {
             "name": "example",
             "cwd": "example",

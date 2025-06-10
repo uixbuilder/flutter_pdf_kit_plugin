@@ -39,6 +39,8 @@ flutter:
       android:
         package: com.example.flutter_pdf_kit_plugin
         pluginClass: FlutterPdfKitPlugin
+      ios:
+        pluginClass: FlutterPdfKitPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

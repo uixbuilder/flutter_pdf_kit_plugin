@@ -16,6 +16,13 @@ class MockFlutterPdfKitPluginPlatform
       'extractHighlightedText() has not been implemented.',
     );
   }
+
+  @override
+  Future<bool> highlightTextInPdf(String pdfPath, String textToHighlight) {
+    throw UnimplementedError(
+      'highlightTextInPdf() has not been implemented.',
+    );
+  }
 }
 
 void main() {

@@ -6,8 +6,6 @@
 // For more information about Flutter integration tests, please see
 // https://flutter.dev/to/integration-testing
 
-import 'dart:math';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -58,7 +56,7 @@ void main() {
     final FlutterPdfKitPlugin plugin = FlutterPdfKitPlugin();
 
     // 3. Attempt to highlight a known phrase in the PDF.
-    final textToHighlight = 'reasons: for fresh air';
+    const textToHighlight = 'reasons: for fresh air';
     final result =
         await plugin.highlightTextInPdf(pdfFile.path, textToHighlight);
 
