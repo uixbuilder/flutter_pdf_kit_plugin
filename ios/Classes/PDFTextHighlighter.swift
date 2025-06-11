@@ -10,6 +10,8 @@ import PDFKit
 
 class PDFTextHighlighter {
     func highlightTextInPdf(pdfURL: URL, textToHighlight: String) -> Bool {
+        let isSecure = pdfURL.startAccessingSecurityScopedResource()
+
         guard let pdfData = try? Data(contentsOf: pdfURL),
               let pdfDocument = PDFDocument(data: pdfData),
               let highlightedTextSelection = pdfDocument.findString(textToHighlight).first
@@ -34,7 +36,11 @@ class PDFTextHighlighter {
                 addedSomeHighlight = true
             }
         }
-        
+        defer {
+            if isSecure {
+                pdfURL.stopAccessingSecurityScopedResource()
+            }
+        }
         return addedSomeHighlight && pdfDocument.write(to: pdfURL)
     }
 }
