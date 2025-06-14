@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_pdf_kit_plugin/flutter_pdf_kit_plugin.dart';
+import 'package:flutter_pdf_kit_plugin/highlight_option.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,16 +42,16 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
         child: Wrap(
           children: [
             ListTile(
-              leading: Icon(Icons.highlight),
-              title: Text('Highlight'),
+              leading: const Icon(Icons.highlight),
+              title: const Text('Highlight'),
               onTap: () {
                 Navigator.pop(ctx);
                 _showHighlightSheet();
               },
             ),
             ListTile(
-              leading: Icon(Icons.list),
-              title: Text('Extract Highlights'),
+              leading: const Icon(Icons.list),
+              title: const Text('Extract Highlights'),
               onTap: () {
                 Navigator.pop(ctx);
                 _showExtractSheet();
@@ -64,7 +65,7 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
 
   void _showHighlightSheet() {
     final controller = TextEditingController();
-    bool enabled = false;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -82,13 +83,13 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
               children: [
                 TextField(
                   controller: controller,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Text to highlight',
                     hintText: 'Enter text to highlight',
                   ),
                   onChanged: (v) => setSheetState(() {}),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: controller.text.trim().isEmpty
                       ? null
@@ -96,13 +97,14 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
                           if (_pdfPath == null) return;
                           final ok = await _plugin.highlightTextInPdf(
                               _pdfPath!, controller.text.trim());
-                          if (ok)
+                          if (ok) {
                             setState(() {
                               _pdfViewKey++;
                             }); // force refresh
+                          }
                           Navigator.pop(context);
                         },
-                  child: Text('Highlight'),
+                  child: const Text('Highlight'),
                 ),
               ],
             ),
@@ -122,20 +124,20 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Extracted Highlights',
+            const Text('Extracted Highlights',
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             if (highlights != null && highlights.isNotEmpty)
               ...highlights.map((t) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
                     child: Text(t),
                   ))
             else
-              Text('No highlights found.'),
-            SizedBox(height: 16),
+              const Text('No highlights found.'),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Close'),
+              child: const Text('Close'),
             ),
           ],
         ),
@@ -146,28 +148,89 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: Text('PDF Highlight Tester'),
+          title: const Text('PDF Highlight Tester'),
           actions: [
             if (_pdfPath != null)
               IconButton(
-                icon: Icon(Icons.menu),
+                icon: const Icon(Icons.menu),
                 onPressed: _showMenu,
               ),
           ],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: _pickPdf,
-          child: Icon(Icons.attach_file),
           tooltip: 'Select PDF',
+          child: const Icon(Icons.attach_file),
         ),
         body: _pdfPath == null
-            ? Center(child: Text('Pick a PDF to start'))
-            : PDFView(
-                key: ValueKey(_pdfViewKey),
-                filePath: _pdfPath,
-                swipeHorizontal: false,
-                autoSpacing: false,
-                pageFling: false,
-              ),
+            ? const Center(child: Text('Pick a PDF to start'))
+            : Theme.of(context).platform == TargetPlatform.android
+                ? PDFView(
+                    key: ValueKey(_pdfViewKey),
+                    filePath: _pdfPath,
+                    swipeHorizontal: false,
+                    autoSpacing: false,
+                    pageFling: false,
+                  )
+                : Center(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.picture_as_pdf),
+                      label: const Text('Open PDF in Native Viewer'),
+                      onPressed: () async {
+                        if (_pdfPath != null) {
+                          final ok = await _plugin.editPdfUsingViewer(
+                            _pdfPath!,
+                            [
+                              HighlightOption(
+                                  tag: "character_line",
+                                  name: "Character's lines",
+                                  color: "#FFFF00"),
+                              HighlightOption(
+                                  tag: "character_name",
+                                  name: "Character's name",
+                                  color: "#00FF00"),
+                            ],
+                          );
+                          if (ok) {
+                            final highlights =
+                                await _plugin.extractHighlightedText(_pdfPath!);
+                            if (!mounted) return;
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (ctx) => Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text('Extracted Highlights',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    const SizedBox(height: 16),
+                                    if (highlights != null &&
+                                        highlights.isNotEmpty)
+                                      ...highlights.map((t) => Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 4.0),
+                                            child: Text(t),
+                                          ))
+                                    else
+                                      const Text('No highlights found.'),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('Close'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                            setState(() {
+                              _pdfViewKey++;
+                            });
+                          }
+                        }
+                      },
+                    ),
+                  ),
       );
 }
