@@ -23,16 +23,6 @@ public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
 
       var highlightedTexts = extractHighlightedTextFromPdf(pdfPath: pdfPath)
       result(highlightedTexts)
-    case "highlightTextInPdf":
-      guard let args = call.arguments as? [String: Any],
-            let pdfPath = args["filePath"] as? String,
-            let textToHighlight = args["textToHighlight"] as? String else {
-        result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments provided", details: nil))
-        return
-      }
-
-      let success = highlightTextInPdf(pdfPath: pdfPath, textToHighlight: textToHighlight)
-      result(success)
     case "editPdfUsingViewer":
       guard let args = call.arguments as? [String: Any],
             let pdfPath = args["filePath"] as? String,
@@ -73,9 +63,5 @@ public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
 
   private func extractHighlightedTextFromPdf(pdfPath: String) -> [String] {
     PDFTextExtractor().extractHighlightedText(from: URL(fileURLWithPath: pdfPath))
-  }
-
-  private func highlightTextInPdf(pdfPath: String, textToHighlight: String) -> Bool {
-    PDFTextHighlighter().highlightTextInPdf(pdfURL: URL(fileURLWithPath: pdfPath), textToHighlight: textToHighlight)
   }
 }

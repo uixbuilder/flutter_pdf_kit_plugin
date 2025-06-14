@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// A class representing a highlight option for PDF editing.
 ///
 /// Contains a [tag] for identification, a [name] for display, and a [color] (e.g., hex string).

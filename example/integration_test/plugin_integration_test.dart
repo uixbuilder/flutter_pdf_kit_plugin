@@ -50,44 +50,4 @@ void main() {
     expect(highlights!.length, 1);
     expect(highlights[0], 'reasons: for fresh air');
   });
-
-  testWidgets('highlight text in PDF', (WidgetTester tester) async {
-    // 1. Load the PDF asset. Make sure 'clear_sample.pdf' is listed under flutter: assets: in pubspec.yaml.
-    final byteData = await rootBundle.load(
-      'integration_test/assets/clear_sample.pdf',
-    );
-
-    // 2. Write PDF data to a temporary file so the plugin can work with a file path.
-    final tempDir = await Directory.systemTemp.createTemp();
-    final pdfFile = File('${tempDir.path}/test.pdf');
-    await pdfFile.writeAsBytes(byteData.buffer.asUint8List());
-
-    final FlutterPdfKitPlugin plugin = FlutterPdfKitPlugin();
-
-    // 3. Attempt to highlight a known phrase in the PDF.
-    const textToHighlight = 'reasons: for fresh air';
-    final result =
-        await plugin.highlightTextInPdf(pdfFile.path, textToHighlight);
-
-    // 4. Check that the plugin reported a successful highlight operation.
-    expect(result, isTrue,
-        reason: 'Highlight should be successfully added to the PDF');
-
-    // 5. Extract highlighted texts and verify the content matches.
-    final highlights = await plugin.extractHighlightedText(pdfFile.path);
-
-    // Clean up the temporary file
-    await pdfFile.delete();
-    await tempDir.delete();
-
-    expect(highlights, isNotNull,
-        reason: 'Extracted highlights should not be null');
-    expect(highlights!.length, 1,
-        reason: 'Exactly one highlight should be present');
-    expect(
-      highlights[0],
-      textToHighlight,
-      reason: 'The highlighted text should exactly match the expected phrase',
-    );
-  });
 }

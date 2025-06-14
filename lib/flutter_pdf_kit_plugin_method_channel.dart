@@ -28,19 +28,6 @@ class MethodChannelFlutterPdfKitPlugin extends FlutterPdfKitPluginPlatform {
   }
 
   @override
-  Future<bool> highlightTextInPdf(
-      String pdfPath, String textToHighlight) async {
-    final result = await methodChannel.invokeMethod<bool>(
-      'highlightTextInPdf',
-      <String, dynamic>{
-        'filePath': pdfPath,
-        'textToHighlight': textToHighlight,
-      },
-    );
-    return result ?? false;
-  }
-
-  @override
   Future<bool> editPdfUsingViewer(
       String filePath, List<HighlightOption> highlightOptions) async {
     final optionsMap = highlightOptions.map((o) => o.toMap()).toList();

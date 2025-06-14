@@ -36,20 +36,6 @@ class FlutterPdfKitPlugin :
         result: Result
     ) {
         when (call.method) {
-            "highlightTextInPdf" -> {
-                val pdfPath = call.argument<String>("filePath")
-                val textToHighlight = call.argument<String>("textToHighlight")
-                if (pdfPath == null || textToHighlight == null) {
-                    result.error("INVALID_ARGUMENT", "filePath and text are required", null)
-                    return
-                }
-                try {
-                    val success = highlightTextInPdf(pdfPath, textToHighlight)
-                    result.success(success)
-                } catch (e: Exception) {
-                    result.error("PDF_ERROR", e.localizedMessage, null)
-                }
-            }
             "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
@@ -136,95 +122,5 @@ class FlutterPdfKitPlugin :
         
         document.close()
         return highlightedTexts
-    }
-
-    fun highlightTextInPdf(pdfPath: String, textToHighlight: String): Boolean {
-        val file = File(pdfPath)
-        val document = PDDocument.load(file)
-        var highlightAdded = false
-        try {
-            // Search each page for the text
-            for (pageIndex in 0 until document.numberOfPages) {
-                val page = document.getPage(pageIndex)
-                val rect = findTextBoundingBox(document, pageIndex, textToHighlight)
-                if (rect != null) {
-                    // Convert the RectF to PDFBox quadPoints (single rectangle)
-                    val pageHeight = page.mediaBox.height
-                    val left = rect.left
-                    val top = pageHeight - rect.top
-                    val right = rect.right
-                    val bottom = pageHeight - rect.bottom
-                    // PDF coordinates: (0,0) is bottom left
-                    val quadPoints = floatArrayOf(
-                        left, top,      // top left
-                        right, top,     // top right
-                        left, bottom,   // bottom left
-                        right, bottom   // bottom right
-                    )
-
-                    val highlight = PDAnnotationTextMarkup(PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT)
-                    highlight.quadPoints = quadPoints
-                    highlight.rectangle = PDRectangle(left, top, right - left, bottom - top)
-                    highlight.color = PDColor(floatArrayOf(1f, 1f, 0f), PDDeviceRGB.INSTANCE) // yellow
-
-                    page.annotations.add(highlight)
-                    highlightAdded = true
-                    break // only highlight first occurrence
-                }
-            }
-            if (highlightAdded) {
-                document.save(file)
-            }
-        } finally {
-            document.close()
-        }
-        return highlightAdded
-    }
-    
-    /**
-     * Finds the bounding box (RectF) of the first occurrence of a given text string on a PDF page.
-     *
-     * @param page The PDPage to search within.
-     * @param searchText The text string to find.
-     * @return RectF representing the bounding box of the text if found, otherwise null.
-     * @throws IOException If there's an error reading the page content.
-     */
-    private fun findTextBoundingBox(document: PDDocument, pageIndex: Int, searchText: String): RectF? {
-        class MatchPosition(val text: StringBuilder, val boxes: MutableList<TextPosition>)
-        val matches = mutableListOf<MatchPosition>()
-        var result: RectF? = null
-
-        val stripper = object : PDFTextStripper() {
-            override fun processTextPosition(text: TextPosition) {
-                // Start new match if necessary
-                if (matches.isEmpty() || matches.last().text.length == searchText.length) {
-                    matches.add(MatchPosition(StringBuilder(), mutableListOf()))
-                }
-                // Add current character to all current partial matches
-                for (match in matches) {
-                    match.text.append(text.unicode)
-                    match.boxes.add(text)
-                    // If the current sequence is longer than searchText, remove from the start
-                    if (match.text.length > searchText.length) {
-                        match.text.deleteCharAt(0)
-                        match.boxes.removeAt(0)
-                    }
-                    // If it matches searchText, compute bounding box
-                    if (match.text.toString() == searchText && result == null) {
-                        val first = match.boxes.first()
-                        val last = match.boxes.last()
-                        val left = first.x
-                        val top = first.y
-                        val right = last.x + last.width
-                        val bottom = last.y - last.height
-                        result = RectF(left, top, right, bottom)
-                    }
-                }
-            }
-        }
-        stripper.startPage = pageIndex + 1
-        stripper.endPage = pageIndex + 1
-        stripper.getText(document) // Triggers processing
-        return result
     }
 }

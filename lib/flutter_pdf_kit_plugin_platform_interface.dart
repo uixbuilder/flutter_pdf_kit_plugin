@@ -36,12 +36,6 @@ abstract class FlutterPdfKitPluginPlatform extends PlatformInterface {
     );
   }
 
-  Future<bool> highlightTextInPdf(String pdfPath, String textToHighlight) {
-    throw UnimplementedError(
-      'highlightTextInPdf() has not been implemented.',
-    );
-  }
-
   /// Opens a native PDF viewer for editing, with customizable highlighting options.
   ///
   /// [filePath] is the path to the PDF file.

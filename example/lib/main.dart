@@ -57,14 +57,6 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.highlight),
-              title: const Text('Highlight'),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showHighlightSheet();
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.list),
               title: const Text('Extract Highlights'),
               onTap: () {
@@ -75,57 +67,6 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
           ],
         ),
       ),
-    );
-  }
-
-  void _showHighlightSheet() {
-    final controller = TextEditingController();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) => Padding(
-            padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-              top: 16,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: controller,
-                  decoration: const InputDecoration(
-                    labelText: 'Text to highlight',
-                    hintText: 'Enter text to highlight',
-                  ),
-                  onChanged: (v) => setSheetState(() {}),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: controller.text.trim().isEmpty
-                      ? null
-                      : () async {
-                          if (_pdfPath == null) return;
-                          final ok = await _plugin.highlightTextInPdf(
-                              _pdfPath!, controller.text.trim());
-                          if (ok) {
-                            setState(() {
-                              _pdfViewKey++;
-                            }); // force refresh
-                          }
-                          Navigator.pop(context);
-                        },
-                  child: const Text('Highlight'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 

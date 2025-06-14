@@ -17,11 +17,6 @@ class FlutterPdfKitPlugin {
     return FlutterPdfKitPluginPlatform.instance.extractHighlightedText(pdfPath);
   }
 
-  Future<bool> highlightTextInPdf(String pdfPath, String textToHighlight) {
-    return FlutterPdfKitPluginPlatform.instance
-        .highlightTextInPdf(pdfPath, textToHighlight);
-  }
-
   /// Opens a native PDF viewer for editing, with customizable highlighting options.
   ///
   /// [filePath] is the path to the PDF file.

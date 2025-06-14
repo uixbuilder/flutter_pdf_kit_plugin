@@ -19,13 +19,6 @@ class MockFlutterPdfKitPluginPlatform
   }
 
   @override
-  Future<bool> highlightTextInPdf(String pdfPath, String textToHighlight) {
-    throw UnimplementedError(
-      'highlightTextInPdf() has not been implemented.',
-    );
-  }
-
-  @override
   Future<bool> editPdfUsingViewer(
       String filePath, List<HighlightOption> highlightOptions) {
     throw UnimplementedError('editPdfUsingViewer() has not been implemented.');
