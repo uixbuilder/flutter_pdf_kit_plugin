@@ -3,6 +3,7 @@ import 'package:flutter_pdf_kit_plugin/flutter_pdf_kit_plugin.dart';
 import 'package:flutter_pdf_kit_plugin/flutter_pdf_kit_plugin_platform_interface.dart';
 import 'package:flutter_pdf_kit_plugin/flutter_pdf_kit_plugin_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:flutter_pdf_kit_plugin/highlight_option.dart';
 
 class MockFlutterPdfKitPluginPlatform
     with MockPlatformInterfaceMixin
@@ -22,6 +23,12 @@ class MockFlutterPdfKitPluginPlatform
     throw UnimplementedError(
       'highlightTextInPdf() has not been implemented.',
     );
+  }
+
+  @override
+  Future<bool> editPdfUsingViewer(
+      String filePath, List<HighlightOption> highlightOptions) {
+    throw UnimplementedError('editPdfUsingViewer() has not been implemented.');
   }
 }
 
