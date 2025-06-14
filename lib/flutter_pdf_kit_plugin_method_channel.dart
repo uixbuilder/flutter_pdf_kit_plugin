@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'flutter_pdf_kit_plugin_platform_interface.dart';
+import 'highlight_option.dart';
 
 /// An implementation of [FlutterPdfKitPluginPlatform] that uses method channels.
 class MethodChannelFlutterPdfKitPlugin extends FlutterPdfKitPluginPlatform {
@@ -37,5 +38,19 @@ class MethodChannelFlutterPdfKitPlugin extends FlutterPdfKitPluginPlatform {
       },
     );
     return result ?? false;
+  }
+
+  @override
+  Future<bool> editPdfUsingViewer(
+      String filePath, List<HighlightOption> highlightOptions) async {
+    final optionsMap = highlightOptions.map((o) => o.toMap()).toList();
+    final result = await methodChannel.invokeMethod(
+      'editPdfUsingViewer',
+      {
+        'filePath': filePath,
+        'highlightOptions': optionsMap,
+      },
+    );
+    return result == true;
   }
 }

@@ -6,6 +6,7 @@
 // https://flutter.dev/to/pubspec-plugin-platforms.
 
 import 'flutter_pdf_kit_plugin_platform_interface.dart';
+import 'highlight_option.dart';
 
 class FlutterPdfKitPlugin {
   Future<String?> getPlatformVersion() {
@@ -19,5 +20,17 @@ class FlutterPdfKitPlugin {
   Future<bool> highlightTextInPdf(String pdfPath, String textToHighlight) {
     return FlutterPdfKitPluginPlatform.instance
         .highlightTextInPdf(pdfPath, textToHighlight);
+  }
+
+  /// Opens a native PDF viewer for editing, with customizable highlighting options.
+  ///
+  /// [filePath] is the path to the PDF file.
+  /// [highlightOptions] is a list of [HighlightOption] objects specifying highlight tags, names, and colors.
+  Future<bool> editPdfUsingViewer(
+    String filePath,
+    List<HighlightOption> highlightOptions,
+  ) {
+    return FlutterPdfKitPluginPlatform.instance
+        .editPdfUsingViewer(filePath, highlightOptions);
   }
 }
