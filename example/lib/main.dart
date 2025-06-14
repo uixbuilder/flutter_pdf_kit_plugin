@@ -23,6 +23,21 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
   String? _pdfPath;
   int _pdfViewKey = 0;
   final _plugin = FlutterPdfKitPlugin();
+  String _platformVersion = 'Unknown';
+
+  @override
+  void initState() {
+    super.initState();
+    _initPlatformVersion();
+  }
+
+  Future<void> _initPlatformVersion() async {
+    final version = await _plugin.getPlatformVersion();
+    if (!mounted) return;
+    setState(() {
+      _platformVersion = version ?? 'Unknown';
+    });
+  }
 
   void _pickPdf() async {
     final result = await FilePicker.platform
@@ -163,7 +178,16 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
           child: const Icon(Icons.attach_file),
         ),
         body: _pdfPath == null
-            ? const Center(child: Text('Pick a PDF to start'))
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Pick a PDF to start'),
+                    const SizedBox(height: 16),
+                    Text('Running on: $_platformVersion'),
+                  ],
+                ),
+              )
             : Theme.of(context).platform == TargetPlatform.android
                 ? PDFView(
                     key: ValueKey(_pdfViewKey),
