@@ -5,11 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "iOS",
+            "name": "iOS Simulator",
             "cwd": "example",
             "request": "launch",
             "type": "dart",
             "deviceId": "A85349E7-5BF1-4E0A-ABA0-F8D689957B60"
+        },
+        {
+            "name": "iOS Device",
+            "cwd": "example",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "00008140-000161820C40801C"
         },
         {
             "name": "Android",
