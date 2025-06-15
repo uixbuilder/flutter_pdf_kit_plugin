@@ -15,6 +15,8 @@ class MyApp extends StatelessWidget {
 }
 
 class PdfDemoPage extends StatefulWidget {
+  const PdfDemoPage({super.key});
+
   @override
   State<PdfDemoPage> createState() => _PdfDemoPageState();
 }
@@ -86,7 +88,7 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
             if (highlights != null && highlights.isNotEmpty)
               ...highlights.map((t) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Text(t),
+                    child: Text(t.toString()),
                   ))
             else
               const Text('No highlights found.'),
@@ -176,7 +178,7 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
                                       ...highlights.map((t) => Padding(
                                             padding: const EdgeInsets.symmetric(
                                                 vertical: 4.0),
-                                            child: Text(t),
+                                            child: Text(t.toString()),
                                           ))
                                     else
                                       const Text('No highlights found.'),
