@@ -14,7 +14,13 @@ public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
     switch call.method {
     case "getPlatformVersion":
       result("iOS " + UIDevice.current.systemVersion)
-      case "extractHighlightedText":
+    case "extractHighlightedText":
+      // Expects arguments: ["filePath": String]
+      // Returns: [[String: Any]]
+      // Each dictionary contains:
+      //   - "text": The highlighted string (String)
+      //   - "color": The highlight color as a hex string (String?) or nil
+      //   - "rect": The bounding rectangle in PDF coordinates (["left", "top", "right", "bottom"])
       guard let args = call.arguments as? [String: Any],
             let pdfPath = args["filePath"] as? String else {
         result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments provided", details: nil))
@@ -61,7 +67,7 @@ public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
     UIApplication.shared.delegate?.window??.rootViewController?.present(vc, animated: true)
   }
 
-  private func extractHighlightedTextFromPdf(pdfPath: String) -> [String] {
+  private func extractHighlightedTextFromPdf(pdfPath: String) -> [[String: Any]] {
     PDFTextExtractor().extractHighlightedText(from: URL(fileURLWithPath: pdfPath))
   }
 }
