@@ -12,7 +12,7 @@ class MockFlutterPdfKitPluginPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<List<String>?> extractHighlightedText(String pdfPath) {
+  Future<List<Map<String, dynamic>>?> extractHighlightedText(String pdfPath) {
     throw UnimplementedError(
       'extractHighlightedText() has not been implemented.',
     );

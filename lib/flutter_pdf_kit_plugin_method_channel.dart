@@ -19,12 +19,13 @@ class MethodChannelFlutterPdfKitPlugin extends FlutterPdfKitPluginPlatform {
   }
 
   @override
-  Future<List<String>?> extractHighlightedText(String pdfPath) async {
+  Future<List<Map<String, dynamic>>?> extractHighlightedText(
+      String pdfPath) async {
     final highlights = await methodChannel.invokeMethod<List<dynamic>>(
       'extractHighlightedText',
       <String, dynamic>{'filePath': pdfPath},
     );
-    return highlights?.cast<String>();
+    return highlights?.map((e) => Map<String, dynamic>.from(e as Map)).toList();
   }
 
   @override

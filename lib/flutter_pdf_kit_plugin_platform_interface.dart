@@ -28,7 +28,12 @@ abstract class FlutterPdfKitPluginPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<List<String>?> extractHighlightedText(
+  /// Extracts all highlighted ranges from the given PDF.
+  /// Returns a list of maps, each containing:
+  ///  - "text": the highlighted string
+  ///  - "color": highlight color as hex string (or #000000 if color is not available)
+  ///  - "rect": a map {"left", "top", "right", "bottom"} (PDF coordinates)
+  Future<List<Map<String, dynamic>>?> extractHighlightedText(
     String pdfPath,
   ) {
     throw UnimplementedError(
