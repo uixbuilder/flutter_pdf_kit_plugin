@@ -40,6 +40,11 @@ class FlutterPdfKitPlugin :
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
             "extractHighlightedText" -> {
+                // Returns: List<Map<String, Any>>
+                // Each item is a map with keys:
+                //  - "text": the highlighted string
+                //  - "color": highlight color as hex string (or null)
+                //  - "rect": a map { "left", "top", "right", "bottom" } in PDF coordinates
                 val pdfPath = call.argument<String>("filePath")
                 if (pdfPath == null) {
                     result.error("INVALID_ARGUMENT", "filePath is required", null)
@@ -62,13 +67,12 @@ class FlutterPdfKitPlugin :
 
     /**
      * Extracts highlighted text from a PDF file.
-     * Returns a list of highlighted strings.
+     * Returns a list of maps with keys "text", "color", and "rect".
      */
-
-    fun extractHighlightedText(pdfPath: String): List<String> {
+    fun extractHighlightedText(pdfPath: String): List<Map<String, Any>> {
         val pdfFile = File(pdfPath)
         val document = PDDocument.load(pdfFile)
-        val highlightedTexts = mutableListOf<String>()
+        val highlightedTexts = mutableListOf<Map<String, Any>>()
 
         for (pageIndex in 0 until document.numberOfPages) {
             val page = document.getPage(pageIndex)
@@ -90,29 +94,51 @@ class FlutterPdfKitPlugin :
             for (annotation in annotations) {
                 if (annotation is PDAnnotationTextMarkup && annotation.subtype == PDAnnotationTextMarkup.SUB_TYPE_HIGHLIGHT) {
                     val quads = annotation.quadPoints ?: continue
+
+                    // Get annotation color as hex string if available
+                    val colorHex: String = annotation.color?.let { pdColor ->
+                        val rgb: FloatArray? = pdColor.components
+                        if (rgb != null && rgb.size >= 3) {
+                            val r = (rgb[0] * 255).toInt().coerceIn(0, 255)
+                            val g = (rgb[1] * 255).toInt().coerceIn(0, 255)
+                            val b = (rgb[2] * 255).toInt().coerceIn(0, 255)
+                            String.format("#%02X%02X%02X", r, g, b)
+                        } else {
+                            null
+                        }
+                    } ?: "#000000"
+
                     var i = 0
                     while (i + 7 < quads.size) {
-                        // Get quad rectangle in PDF coordinates
+                        // Get quad rectangle in PDF coordinates (origin bottom-left)
                         val xs = listOf(quads[i], quads[i+2], quads[i+4], quads[i+6])
                         val ys = listOf(quads[i+1], quads[i+3], quads[i+5], quads[i+7])
                         val left = xs.minOrNull() ?: continue
                         val right = xs.maxOrNull() ?: continue
-                        var top = ys.maxOrNull() ?: continue
-                        var bottom = ys.minOrNull() ?: continue
-                        // Convert PDF coordinates (origin bottom) to Java/Android (origin top)
-                        top = pageHeight - top
-                        bottom = pageHeight - bottom
+                        val top = ys.maxOrNull() ?: continue
+                        val bottom = ys.minOrNull() ?: continue
 
                         // In PDFBox, y=0 is bottom; so characterCenterY = tp.y - tp.height / 2f is already Java coordinates
                         val highlightedChars = textPositions.filter { tp ->
                             val centerX = tp.x + tp.width / 2f
                             val centerY = tp.y - tp.height / 2f // May need to verify this if highlight is a bit off
-                            centerX in left..right && centerY in top..bottom
+                            centerX in left..right && centerY in (pageHeight - top)..(pageHeight - bottom)
                         }
                         val highlightedText = highlightedChars.joinToString(separator = "") { it.unicode }
                             .trim()
                         if (highlightedText.isNotEmpty()) {
-                            highlightedTexts.add(highlightedText)
+                            val rectMap = mapOf(
+                                "left" to left,
+                                "top" to bottom,
+                                "right" to right,
+                                "bottom" to top
+                            )
+                            val item = mutableMapOf<String, Any>(
+                                "text" to highlightedText,
+                                "rect" to rectMap
+                            )
+                            item["color"] = colorHex
+                            highlightedTexts.add(item)
                         }
                         i += 8
                     }
