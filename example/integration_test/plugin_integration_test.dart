@@ -45,9 +45,22 @@ void main() {
     await pdfFile.delete();
     await tempDir.delete();
 
-    // Verify that the highlights were extracted correctly.
+    // Verify that the highlights were extracted correctly as a list of maps.
     expect(highlights, isNotNull);
     expect(highlights!.length, 1);
-    expect(highlights[0], 'reasons: for fresh air');
+
+    final first = highlights[0];
+    expect(first, isA<Map<String, dynamic>>());
+    expect(first['text'], 'reasons: for fresh air');
+    expect(first['color'], '#FFFF00');
+    expect(first['rect'], isA<Map>());
+    expect(first['rect']['left'], isA<num>());
+    expect(first['rect']['top'], isA<num>());
+    expect(first['rect']['right'], isA<num>());
+    expect(first['rect']['bottom'], isA<num>());
+    expect(first['rect']['left'], closeTo(164.042, 0.01));
+    expect(first['rect']['top'], closeTo(554.364, 0.01));
+    expect(first['rect']['right'], closeTo(318.121, 0.01));
+    expect(first['rect']['bottom'], closeTo(567.924, 0.01));
   });
 }
