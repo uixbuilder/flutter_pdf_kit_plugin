@@ -39,7 +39,7 @@ void main() {
 
     // Create an instance of the plugin to call the method.
     final FlutterPdfKitPlugin plugin = FlutterPdfKitPlugin();
-    final highlights = await plugin.extractHighlightedText(pdfFile.path);
+    final highlights = await plugin.extractHighlightedText(pdfFile.path, false);
 
     // Clean up the temporary file
     await pdfFile.delete();

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:flutter_pdf_kit_plugin/flutter_pdf_kit_plugin.dart';
-import 'package:flutter_pdf_kit_plugin/highlight_option.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +10,7 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
-  Widget build(BuildContext context) => MaterialApp(home: PdfDemoPage());
+  Widget build(BuildContext context) => const MaterialApp(home: PdfDemoPage());
 }
 
 class PdfDemoPage extends StatefulWidget {
@@ -74,7 +73,7 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
 
   void _showExtractSheet() async {
     if (_pdfPath == null) return;
-    final highlights = await _plugin.extractHighlightedText(_pdfPath!);
+    final highlights = await _plugin.extractHighlightedText(_pdfPath!, false);
     showModalBottomSheet(
       context: context,
       builder: (ctx) => Padding(
@@ -145,56 +144,44 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
                       label: const Text('Open PDF in Native Viewer'),
                       onPressed: () async {
                         if (_pdfPath != null) {
-                          final ok = await _plugin.editPdfUsingViewer(
+                          final highlights =
+                              await _plugin.extractHighlightedText(
                             _pdfPath!,
-                            [
-                              HighlightOption(
-                                  tag: "character_line",
-                                  name: "Character's lines",
-                                  color: "#FFFF00"),
-                              HighlightOption(
-                                  tag: "character_name",
-                                  name: "Character's name",
-                                  color: "#00FF00"),
-                            ],
+                            true,
                           );
-                          if (ok) {
-                            final highlights =
-                                await _plugin.extractHighlightedText(_pdfPath!);
-                            if (!mounted) return;
-                            showModalBottomSheet(
-                              context: context,
-                              builder: (ctx) => Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text('Extracted Highlights',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                    const SizedBox(height: 16),
-                                    if (highlights != null &&
-                                        highlights.isNotEmpty)
-                                      ...highlights.map((t) => Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 4.0),
-                                            child: Text(t.toString()),
-                                          ))
-                                    else
-                                      const Text('No highlights found.'),
-                                    const SizedBox(height: 16),
-                                    ElevatedButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Close'),
-                                    ),
-                                  ],
-                                ),
+                          if (highlights == null) return;
+                          if (!mounted) return;
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (ctx) => Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text('Extracted Highlights',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 16),
+                                  if (highlights.isNotEmpty)
+                                    ...highlights.map((t) => Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 4.0),
+                                          child: Text(t.toString()),
+                                        ))
+                                  else
+                                    const Text('No highlights found.'),
+                                  const SizedBox(height: 16),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Close'),
+                                  ),
+                                ],
                               ),
-                            );
-                            setState(() {
-                              _pdfViewKey++;
-                            });
-                          }
+                            ),
+                          );
+                          setState(() {
+                            _pdfViewKey++;
+                          });
                         }
                       },
                     ),
