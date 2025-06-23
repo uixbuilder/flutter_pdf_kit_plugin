@@ -40,6 +40,7 @@ class FlutterPdfKitPlugin :
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
             "extractHighlightedText" -> {
+                // TODO: allowAddingHighlights is not supported by Android yet.
                 // Returns: List<Map<String, Any>>
                 // Each item is a map with keys:
                 //  - "text": the highlighted string

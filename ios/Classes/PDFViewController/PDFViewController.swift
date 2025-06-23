@@ -11,7 +11,7 @@ public class PDFViewController: UIViewController, PDFViewDelegate {
     /// A tuple describing a highlight style and tag.
     public typealias HighlightMeta = (tag: String, title: String, color: UIColor)
     /// A handler called on completion of save/close events.
-    public typealias CompletionHandler = (_ pdfHighlighted: Bool) -> Void
+    public typealias CompletionHandler = (_ highlightedPDF: PDFDocument?) -> Void
     
     private let pdfView = PDFView()
     private let document: PDFDocument
@@ -61,12 +61,12 @@ public class PDFViewController: UIViewController, PDFViewDelegate {
         if let document = PDFDocument(url: pdfURL) {
             self.document = document
             super.init(nibName: nil, bundle: nil)
+            
             self.saveDocumentButton = controlFactory.makeSaveDocumentButton { [weak self] in
-                self?.hasChanges = self?.savePDF(outputURL: pdfURL) == false
-                completionHandler(self?.hasChanges ?? false)
+                completionHandler(self?.document)
             }
             self.closeButton = controlFactory.makeCloseButton {
-                completionHandler(false)
+                completionHandler(nil)
             }
         }
         else {
@@ -246,6 +246,7 @@ public class PDFViewController: UIViewController, PDFViewDelegate {
             let annotation = PDFAnnotation(bounds: selectionByLine.bounds(for: page), forType: .highlight, withProperties: nil)
             annotation.color = color.withAlphaComponent(0.4)
             annotation.setValue(tag, forAnnotationKey: PDFAnnotationKey.name)
+            annotation.contents = selectionByLine.string
             page.addAnnotation(annotation)
         }
         pdfView.clearSelection()

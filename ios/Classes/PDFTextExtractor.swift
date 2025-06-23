@@ -9,12 +9,8 @@ import PDFKit
 
     
 class PDFTextExtractor {
-    func extractHighlightedText(from pdfURL: URL) -> [[String: Any]] {
+    func extractHighlightedText(from pdfDocument: PDFDocument) -> [[String: Any]] {
         var allHighlights: [[String: Any]] = []
-        
-        guard let pdfData = try? Data(contentsOf: pdfURL), let pdfDocument = PDFDocument(data: pdfData) else {
-            return []
-        }
 
         for pageIndex in 0..<pdfDocument.pageCount {
             guard let page = pdfDocument.page(at: pageIndex) else { continue }
@@ -45,7 +41,8 @@ class PDFTextExtractor {
                     let highlightDict: [String: Any] = [
                         "text": highlightedText,
                         "color": colorHex as Any,
-                        "rect": rectMap
+                        "rect": rectMap,
+                        "pageIndex": pageIndex
                     ]
                     allHighlights.append(highlightDict)
                 }

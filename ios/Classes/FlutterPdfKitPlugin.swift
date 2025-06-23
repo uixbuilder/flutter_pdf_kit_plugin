@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import PDFKit
 
 public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
   public static var controlsFactory: PDFViewControlsFactory = DefaultPDFViewControlsFactory() // Default, can be swapped
@@ -15,59 +16,90 @@ public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
     case "getPlatformVersion":
       result("iOS " + UIDevice.current.systemVersion)
     case "extractHighlightedText":
-      // Expects arguments: ["filePath": String]
+      // Expects arguments: ["filePath": String, "allowAddingHighlights": String]
       // Returns: [[String: Any]]
       // Each dictionary contains:
       //   - "text": The highlighted string (String)
       //   - "color": The highlight color as a hex string (String?) or nil
       //   - "rect": The bounding rectangle in PDF coordinates (["left", "top", "right", "bottom"])
-      guard let args = call.arguments as? [String: Any],
-            let pdfPath = args["filePath"] as? String else {
-        result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments provided", details: nil))
-        return
-      }
-
-      var highlightedTexts = extractHighlightedTextFromPdf(pdfPath: pdfPath)
-      result(highlightedTexts)
-    case "editPdfUsingViewer":
+      //   - "pageIndex": The page index where the highlight is found (Int)
       guard let args = call.arguments as? [String: Any],
             let pdfPath = args["filePath"] as? String,
-            let highlightOptions = args["highlightOptions"] as? [[String: Any]] else {
+            let allowAddingHighlights = args["allowAddingHighlights"] as? Bool else {
         result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments provided", details: nil))
         return
       }
-      let highlightMeta = highlightOptions.compactMap { opt -> (String, String, UIColor)? in
-        guard let tag = opt["tag"] as? String,
-              let name = opt["name"] as? String,
-              let colorHex = opt["color"] as? String,
-              let color = PDFViewController.color(from: colorHex) else { return nil }
 
-        return PDFViewController.HighlightMeta(tag: tag, title: name, color: color)
+      if allowAddingHighlights == false {
+          guard let pdfDocument = PDFDocument(url: URL(filePath: pdfPath)) else {
+              result(FlutterError(code: "FILE_READING_FAILED", message: "Failed to read PDF file", details: nil))
+              return
+          }
+          
+          let highlightedTexts = extractHighlightedTextFromPdf(document: pdfDocument)
+          result(highlightedTexts)
       }
-      presentPdfViewer(pdfPath: pdfPath, highlightMeta: highlightMeta, flutterResult: result)
+      else if let lineColor = PDFViewController.color(from: "#FFFF00"),
+              let nameColor = PDFViewController.color(from: "#00FF00")
+      {
+        let highlightMeta = [
+          PDFViewController.HighlightMeta(tag: "character_line", title: "Character's lines", color: lineColor),
+          PDFViewController.HighlightMeta(tag: "character_name", title: "Character's name", color: nameColor)
+        ]
+        
+        presentPdfViewer(pdfPath: pdfPath, highlightMeta: highlightMeta, flutterResult: result)
+      }
+      else {
+        result(FlutterError(code: "COLOR_CREATION_FAILED", message: "Failed to create highlight colors", details: nil))
+      }
     default:
       result(FlutterMethodNotImplemented)
     }
   }
 
+  private func topViewController(base: UIViewController? = UIApplication.shared.connectedScenes
+    .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+    .first?.rootViewController) -> UIViewController? {
+  if let nav = base as? UINavigationController {
+    return topViewController(base: nav.visibleViewController)
+  }
+  if let tab = base as? UITabBarController, let selected = tab.selectedViewController {
+    return topViewController(base: selected)
+  }
+  if let presented = base?.presentedViewController {
+    return topViewController(base: presented)
+  }
+  return base
+}
+
   private func presentPdfViewer(pdfPath: String, highlightMeta: [PDFViewController.HighlightMeta], flutterResult: @escaping FlutterResult) {
+    guard let topViewController = topViewController() else {
+      flutterResult(FlutterError(code: "NO_TOP_CONTROLLER", message: "No top view controller found", details: nil))
+      return
+    }
+
     guard let vc = try? PDFViewController(
       pdfURL: URL(fileURLWithPath: pdfPath),
       highlightMeta: highlightMeta,
       controlFactory: FlutterPdfKitPlugin.controlsFactory, // <-- use the static property here
-      completionHandler: { didSave in
-        UIApplication.shared.delegate?.window??.rootViewController?.dismiss(animated: true)
-        flutterResult(didSave)
+      completionHandler: { [weak self] document in
+        topViewController.dismiss(animated: true)
+          guard let self, let document else {
+              flutterResult(nil)
+              return
+          }
+          
+          flutterResult(self.extractHighlightedTextFromPdf(document: document))
       }
     ) else {
       flutterResult(FlutterError(code: "VIEWER_CREATION_FAILED", message: "Failed to create PDF viewer", details: nil))
       return
     }
     vc.modalPresentationStyle = .fullScreen
-    UIApplication.shared.delegate?.window??.rootViewController?.present(vc, animated: true)
+    topViewController.present(vc, animated: true)
   }
 
-  private func extractHighlightedTextFromPdf(pdfPath: String) -> [[String: Any]] {
-    PDFTextExtractor().extractHighlightedText(from: URL(fileURLWithPath: pdfPath))
+    private func extractHighlightedTextFromPdf(document: PDFDocument) -> [[String: Any]] {
+    PDFTextExtractor().extractHighlightedText(from: document)
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'flutter_pdf_kit_plugin_platform_interface.dart';
-import 'highlight_option.dart';
 
 /// An implementation of [FlutterPdfKitPluginPlatform] that uses method channels.
 class MethodChannelFlutterPdfKitPlugin extends FlutterPdfKitPluginPlatform {
@@ -20,25 +19,16 @@ class MethodChannelFlutterPdfKitPlugin extends FlutterPdfKitPluginPlatform {
 
   @override
   Future<List<Map<String, dynamic>>?> extractHighlightedText(
-      String pdfPath) async {
+    String pdfPath,
+    bool allowAddingHighlights,
+  ) async {
     final highlights = await methodChannel.invokeMethod<List<dynamic>>(
       'extractHighlightedText',
-      <String, dynamic>{'filePath': pdfPath},
-    );
-    return highlights?.map((e) => Map<String, dynamic>.from(e as Map)).toList();
-  }
-
-  @override
-  Future<bool> editPdfUsingViewer(
-      String filePath, List<HighlightOption> highlightOptions) async {
-    final optionsMap = highlightOptions.map((o) => o.toMap()).toList();
-    final result = await methodChannel.invokeMethod(
-      'editPdfUsingViewer',
-      {
-        'filePath': filePath,
-        'highlightOptions': optionsMap,
+      <String, dynamic>{
+        'filePath': pdfPath,
+        'allowAddingHighlights': allowAddingHighlights
       },
     );
-    return result == true;
+    return highlights?.map((e) => Map<String, dynamic>.from(e as Map)).toList();
   }
 }
