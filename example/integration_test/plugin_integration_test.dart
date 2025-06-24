@@ -53,6 +53,7 @@ void main() {
     expect(first, isA<Map<String, dynamic>>());
     expect(first['text'], 'reasons: for fresh air');
     expect(first['color'], '#FFFF00');
+    expect(first['pageIndex'], 0);
     expect(first['rect'], isA<Map>());
     expect(first['rect']['left'], isA<num>());
     expect(first['rect']['top'], isA<num>());

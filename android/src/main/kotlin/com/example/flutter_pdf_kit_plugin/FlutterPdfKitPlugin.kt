@@ -46,6 +46,7 @@ class FlutterPdfKitPlugin :
                 //  - "text": the highlighted string
                 //  - "color": highlight color as hex string (or null)
                 //  - "rect": a map { "left", "top", "right", "bottom" } in PDF coordinates
+                //  - "pageIndex": the page number (0-based)
                 val pdfPath = call.argument<String>("filePath")
                 if (pdfPath == null) {
                     result.error("INVALID_ARGUMENT", "filePath is required", null)
@@ -136,7 +137,8 @@ class FlutterPdfKitPlugin :
                             )
                             val item = mutableMapOf<String, Any>(
                                 "text" to highlightedText,
-                                "rect" to rectMap
+                                "rect" to rectMap,
+                                "pageIndex" to pageIndex
                             )
                             item["color"] = colorHex
                             highlightedTexts.add(item)
