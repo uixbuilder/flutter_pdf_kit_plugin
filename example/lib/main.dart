@@ -74,6 +74,7 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
   void _showExtractSheet() async {
     if (_pdfPath == null) return;
     final highlights = await _plugin.extractHighlightedText(_pdfPath!, false);
+    if (!mounted) return;
     showModalBottomSheet(
       context: context,
       builder: (ctx) => Padding(
@@ -150,7 +151,7 @@ class _PdfDemoPageState extends State<PdfDemoPage> {
                             true,
                           );
                           if (highlights == null) return;
-                          if (!mounted) return;
+                          if (!context.mounted) return;
                           showModalBottomSheet(
                             context: context,
                             builder: (ctx) => Padding(
