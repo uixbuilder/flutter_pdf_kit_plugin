@@ -3,8 +3,6 @@ import UIKit
 import PDFKit
 
 public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
-  public static var controlsFactory: PDFViewControlsFactory = DefaultPDFViewControlsFactory() // Default, can be swapped
-
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "flutter_pdf_kit_plugin", binaryMessenger: registrar.messenger())
     let instance = FlutterPdfKitPlugin()
@@ -39,18 +37,8 @@ public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
           let highlightedTexts = extractHighlightedTextFromPdf(document: pdfDocument)
           result(highlightedTexts)
       }
-      else if let lineColor = PDFViewController.color(from: "#FFFF00"),
-              let nameColor = PDFViewController.color(from: "#00FF00")
-      {
-        let highlightMeta = [
-          PDFViewController.HighlightMeta(tag: "character_line", title: "Character's lines", color: lineColor),
-          PDFViewController.HighlightMeta(tag: "character_name", title: "Character's name", color: nameColor)
-        ]
-        
-        presentPdfViewer(pdfPath: pdfPath, highlightMeta: highlightMeta, flutterResult: result)
-      }
       else {
-        result(FlutterError(code: "COLOR_CREATION_FAILED", message: "Failed to create highlight colors", details: nil))
+        presentPdfViewer(pdfPath: pdfPath, flutterResult: result)
       }
     default:
       result(FlutterMethodNotImplemented)
@@ -72,7 +60,7 @@ public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
   return base
 }
 
-  private func presentPdfViewer(pdfPath: String, highlightMeta: [PDFViewController.HighlightMeta], flutterResult: @escaping FlutterResult) {
+  private func presentPdfViewer(pdfPath: String, flutterResult: @escaping FlutterResult) {
     guard let topViewController = topViewController() else {
       flutterResult(FlutterError(code: "NO_TOP_CONTROLLER", message: "No top view controller found", details: nil))
       return
@@ -80,8 +68,6 @@ public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
 
     guard let vc = try? PDFViewController(
       pdfURL: URL(fileURLWithPath: pdfPath),
-      highlightMeta: highlightMeta,
-      controlFactory: FlutterPdfKitPlugin.controlsFactory, // <-- use the static property here
       completionHandler: { [weak self] document in
         topViewController.dismiss(animated: true)
           guard let self, let document else {
@@ -95,8 +81,33 @@ public class FlutterPdfKitPlugin: NSObject, FlutterPlugin {
       flutterResult(FlutterError(code: "VIEWER_CREATION_FAILED", message: "Failed to create PDF viewer", details: nil))
       return
     }
-    vc.modalPresentationStyle = .fullScreen
-    topViewController.present(vc, animated: true)
+      let button = UIButton(primaryAction: UIAction(image: UIImage(named: "back-button"), handler: { _ in
+          topViewController.dismiss(animated: true)
+          flutterResult(nil)
+      }))
+      button.tintColor = .white
+      let backItem = UIBarButtonItem(customView: button)
+      vc.navigationItem.leftBarButtonItem = backItem
+      
+      if let navigationController = topViewController as? UINavigationController {
+          navigationController.pushViewController(vc, animated: false)
+      }
+      else {
+          let navigationController = UINavigationController(rootViewController: vc)
+          navigationController.hidesBarsOnSwipe = false
+          let appearance = UINavigationBarAppearance()
+          appearance.configureWithOpaqueBackground()
+          appearance.backgroundColor = .black
+          appearance.titleTextAttributes = [.foregroundColor: UIColor.white,
+                                            .font: UIFont(name: "SheillaMonicaRegular", size: 24) ??
+                                            UIFont.systemFont(ofSize: 24, weight: .regular)]
+          navigationController.navigationBar.standardAppearance = appearance
+          navigationController.navigationBar.scrollEdgeAppearance = appearance
+          navigationController.navigationBar.compactAppearance = appearance
+          navigationController.navigationBar.isTranslucent = false
+          navigationController.modalPresentationStyle = .fullScreen
+          topViewController.present(navigationController, animated: true)
+      }
   }
 
     private func extractHighlightedTextFromPdf(document: PDFDocument) -> [[String: Any]] {
